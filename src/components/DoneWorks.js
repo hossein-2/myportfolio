@@ -1,12 +1,14 @@
 import React, { Component } from "react";
+import CardContainer from "../styles/CardContainer";
 
 class DoneWorks extends Component {
   render() {
     return (
-      <div className="card border-success mb-3">
-        <div className="card-header h5 bg-success">Done Works</div>
-        <div className="card-body text-dark"></div>
-      </div>
+      <CardContainer
+        subject="Done Works"
+        border="border-success"
+        bg="bg-success"
+      ></CardContainer>
     );
   }
 }

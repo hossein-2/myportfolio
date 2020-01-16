@@ -1,64 +1,157 @@
 import React, { Component } from "react";
-import DoneWorks from "./DoneWorks";
+import ToDoObject from "./ToDoObject";
 import axios from "axios";
+import CardContainer from "../styles/CardContainer";
+import "../index.css";
+import classnames from "classnames";
 
 class ToDo extends Component {
-  state = { todos: [], userId: "", loading: true, title: "", completed: "" };
+  state = {
+    todos: [],
+    userId: "",
+    loading: true,
+    title: "",
+    completed: "",
+    errors: {}
+  };
 
   async componentDidMount() {
     const res = await axios.get("https://jsonplaceholder.typicode.com/todos");
     this.setState({ todos: res.data, loading: false });
   }
 
-  handleRemoveUser = id => e => {
+  deleteSubject = id => {
     const { todos } = this.state;
     const filteredTodos = todos.filter(doe => doe.id !== id);
     this.setState({ todos: filteredTodos });
   };
 
+  doneSubject = id => {
+    const { todos } = this.state;
+    const mappedTodos = todos.map(doe =>
+      doe.id === id ? { ...doe, completed: !doe.completed } : doe
+    );
+    this.setState({ todos: mappedTodos });
+  };
+
+  unDoneSubject = id => {
+    const { todos } = this.state;
+    const mappedTodos = todos.map(doe =>
+      doe.id === id ? { ...doe, completed: !doe.completed } : doe
+    );
+    this.setState({ todos: mappedTodos });
+  };
+
+  handleAddUser = e => {
+    e.preventDefault();
+
+    const { todos, title, completed } = this.state;
+    if (title === "") {
+      this.setState({ errors: { title: "Name is required" } });
+      return;
+    }
+    const doe = { id: Math.random(), title, completed };
+    const newTodos = [doe, ...todos];
+    this.setState({ todos: newTodos });
+    this.setState({ title: "" });
+  };
+  handleChange = e => {
+    this.setState({ title: e.target.value });
+  };
+
+  handleCheckboxChange = e => {
+    this.setState({ completed: e.target.checked });
+  };
   render() {
-    const { todos, id, loading, title, completed } = this.state;
+    const { todos, loading, errors, title, completed } = this.state;
     return (
-      <div className="card border-danger mb-3">
-        <div className="card-header h5 bg-danger ">ToDo List</div>
-        <div className="card-body text-dark">
+      <React.Fragment>
+        <CardContainer subject="Enter New Duty" border="border-dark" bg="">
+          <form onSubmit={this.handleAddUser}>
+            <div className="form-group ">
+              <label htmlFor="subject">Subject</label>
+              <input
+                className={classnames("form-control form-control-sm  mb-1", {
+                  "is-invalid": errors.title
+                })}
+                type="text"
+                name="subject"
+                placeholder="Enter The Subject"
+                onChange={this.handleChange}
+                error={errors.title}
+                value={title}
+              />
+              {errors.title && (
+                <div className="invalid-feedback mb-1">{errors.title}</div>
+              )}
+              <div className="form-group ">
+                <label
+                  style={{
+                    cursor: "pointer"
+                  }}
+                >
+                  {" "}
+                  <input
+                    type="checkbox"
+                    name="checkbox"
+                    checked={completed}
+                    onChange={this.handleCheckboxChange}
+                  />
+                  <span style={{ marginLeft: 8 }}>completed</span>
+                </label>
+              </div>
+              <input type="submit" className="btn  btn-dark" value="Add Duty" />
+            </div>
+          </form>
+        </CardContainer>
+        <CardContainer subject="To Do" border="border-danger" bg="bg-danger">
           {loading ? (
             <h1>loading... </h1>
           ) : (
             todos.map(doe => {
-              const { id, title, completed } = doe;
-
+              const { id, completed } = doe;
               return (
-                completed && (
-                  <ul className="list-group mb-2">
-                    <li className="list-group-item">
-                      <b>Subject:</b> {title}
-                      <i
-                        className="fas fa-check fa-lg"
-                        style={{
-                          cursor: "pointer",
-                          float: "right",
-                          color: "green"
-                        }}
-                      />
-                      <i
-                        className="fas fa-times fa-lg"
-                        style={{
-                          cursor: "pointer",
-                          float: "right",
-                          color: "red",
-                          marginRight: "0.5rem"
-                        }}
-                        onClick={this.handleRemoveUser(id)}
-                      />
-                    </li>
-                  </ul>
+                !doe.completed && (
+                  <ToDoObject
+                    doundo="fa-check"
+                    color="fa-green"
+                    key={doe.id}
+                    doe={doe}
+                    deleteCLickHandler={this.deleteSubject.bind(this, id)}
+                    doneClickHandler={this.doneSubject.bind(this, id)}
+                  />
                 )
               );
             })
           )}
-        </div>
-      </div>
+        </CardContainer>
+        <CardContainer
+          subject="Works Done"
+          border="border-success"
+          bg="bg-success"
+        >
+          {" "}
+          {loading ? (
+            <h1>loading... </h1>
+          ) : (
+            todos.map(doe => {
+              const { id } = doe;
+              return (
+                doe.completed && (
+                  <ToDoObject
+                    color="fa-blue"
+                    doundo="fa-undo"
+                    key={doe.id}
+                    doe={doe}
+                    deleteCLickHandler={this.deleteSubject.bind(this, id)}
+                    doneClickHandler={this.unDoneSubject.bind(this, id)}
+                  />
+                )
+              );
+            })
+          )}
+        </CardContainer>
+      </React.Fragment>
     );
   }
 }

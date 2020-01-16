@@ -1,9 +1,7 @@
-.center-navbar {
-  text-align: center;
+.fa-green {
+  color: green;
 }
-.center-navbar .navbar {
-  display: inline-block;
-}
-.center-navbar .navbar .container {
-  width: 100%;
+
+.fa-blue {
+  color: blue;
 }
